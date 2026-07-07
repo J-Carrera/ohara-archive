@@ -112,17 +112,60 @@ function TextInput({
   );
 }
 
+type Source = {
+  id: string;
+  url: string;
+  title: string;
+  preview: string;
+  text: string;
+};
+
 export default function OharaArchive() {
   const [urlInput, setUrlInput] = useState("");
-  const [sources, setSources] = useState<string[]>([]);
+  const [sources, setSources] = useState<Source[]>([]);
   const [questionInput, setQuestionInput] = useState("");
   const [answer, setAnswer] = useState("Waiting...");
   const [isWaiting, setIsWaiting] = useState(true);
 
-  const addSource = () => {
-    const val = urlInput.trim();
-    if (!val) return;
-    setSources((prev) => [...prev, val]);
+  const addSource = async () => {
+    const url = urlInput.trim();
+
+    if (!url) return;
+
+    const response = await fetch("/api/process-url", {
+      method: "POST",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+
+      body: JSON.stringify({
+        url,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!data.success) {
+      alert("Unable to process website.");
+
+      return;
+    }
+
+    const newSource: Source = {
+      id: crypto.randomUUID(),
+
+      url,
+
+      title: data.title,
+
+      preview: data.preview,
+
+      text: data.text,
+    };
+
+    setSources((prev) => [...prev, newSource]);
+
     setUrlInput("");
   };
 
@@ -231,9 +274,9 @@ export default function OharaArchive() {
             </div>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              {sources.map((url, i) => (
+              {sources.map((source, i) => (
                 <div
-                  key={i}
+                  key={source.id}
                   style={{
                     display: "flex",
                     alignItems: "center",
@@ -242,22 +285,33 @@ export default function OharaArchive() {
                     background: colors.cream,
                     border: `1px solid ${colors.border}`,
                     borderRadius: 8,
-                    fontSize: 13,
-                    wordBreak: "break-all",
                   }}
                 >
-                  <a
-                    href={url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{
-                      color: colors.text,
-                      textDecoration: "none",
-                      marginRight: 10,
-                    }}
-                  >
-                    {url}
-                  </a>
+                  <div style={{ flex: 1 }}>
+                    <a
+                      href={source.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        color: colors.text,
+                        textDecoration: "none",
+                        fontWeight: 600,
+                      }}
+                    >
+                      {source.title || source.url}
+                    </a>
+
+                    <div
+                      style={{
+                        fontSize: 12,
+                        color: colors.muted,
+                        marginTop: 4,
+                      }}
+                    >
+                      {source.preview}
+                    </div>
+                  </div>
+
                   <button
                     onClick={() => removeSource(i)}
                     style={{
@@ -265,8 +319,6 @@ export default function OharaArchive() {
                       border: "none",
                       color: colors.muted,
                       fontSize: 16,
-                      padding: "0 4px",
-                      lineHeight: 1,
                       cursor: "pointer",
                     }}
                   >
