@@ -1,10 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
-import { extractArticle } from "@/lib/rag/scraper";
+import { processSource } from "@/lib/rag/pipeline";
 
-export async function POST(req: NextRequest) {
-  const { url } = await req.json();
+export async function POST(request: NextRequest) {
+  try {
+    const { url } = await request.json();
 
-  const article = await extractArticle(url);
+    const source = await processSource(url);
 
-  return NextResponse.json(article);
+    return NextResponse.json(source);
+  } catch (error) {
+    console.error(error);
+
+    return NextResponse.json(
+      {
+        success: false,
+        error: "Unable to process article.",
+      },
+      {
+        status: 500,
+      },
+    );
+  }
 }

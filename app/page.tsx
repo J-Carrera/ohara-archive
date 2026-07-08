@@ -1,6 +1,16 @@
 "use client";
 
 import { useState, KeyboardEvent } from "react";
+import SourceList from "../components/archive/sourceList";
+import UrlInput from "../components/archive/UrlInput";
+import QuestionInput from "../components/archive/questionInput";
+import AnswerCard from "../components/archive/answerCard";
+import { useOharaArchive } from "./hooks/useOharaArchive";
+import type { Source } from "../lib/types";
+import Card from "../components/ui/card";
+import Button from "../components/ui/button";
+import Label from "../components/ui/label";
+import TextInput from "../components/ui/textinput";
 
 const colors = {
   sage: "#3f4d43",
@@ -14,185 +24,8 @@ const colors = {
   teal: "#7fc9a8",
 };
 
-function Label({ children }: { children: React.ReactNode }) {
-  return (
-    <div
-      style={{
-        fontSize: 12,
-        fontWeight: 700,
-        letterSpacing: 1,
-        color: colors.sage,
-        textTransform: "uppercase",
-        marginBottom: 14,
-      }}
-    >
-      {children}
-    </div>
-  );
-}
-
-function Card({ children }: { children: React.ReactNode }) {
-  return (
-    <div
-      style={{
-        background: colors.card,
-        border: `1px solid ${colors.border}`,
-        borderRadius: 10,
-        padding: 24,
-        marginBottom: 20,
-      }}
-    >
-      {children}
-    </div>
-  );
-}
-
-function Button({
-  children,
-  onClick,
-}: {
-  children: React.ReactNode;
-  onClick: () => void;
-}) {
-  const [hover, setHover] = useState(false);
-  return (
-    <button
-      onClick={onClick}
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
-      style={{
-        padding: "12px 20px",
-        border: "none",
-        borderRadius: 8,
-        background: hover ? colors.beigeBtnHover : colors.beigeBtn,
-        color: "#4a4436",
-        fontSize: 14,
-        fontWeight: 600,
-        cursor: "pointer",
-        whiteSpace: "nowrap",
-      }}
-    >
-      {children}
-    </button>
-  );
-}
-
-function TextInput({
-  value,
-  onChange,
-  placeholder,
-  onEnter,
-}: {
-  value: string;
-  onChange: (v: string) => void;
-  placeholder: string;
-  onEnter: () => void;
-}) {
-  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") onEnter();
-  };
-  return (
-    <input
-      type="text"
-      value={value}
-      placeholder={placeholder}
-      onChange={(e) => onChange(e.target.value)}
-      onKeyDown={handleKeyDown}
-      style={{
-        flex: 1,
-        padding: "12px 14px",
-        border: `1px solid ${colors.border}`,
-        borderRadius: 8,
-        fontSize: 14,
-        color: colors.text,
-        background: colors.cream,
-        outline: "none",
-      }}
-    />
-  );
-}
-
-type Source = {
-  id: string;
-  url: string;
-  title: string;
-  preview: string;
-  text: string;
-};
-
 export default function OharaArchive() {
-  const [urlInput, setUrlInput] = useState("");
-  const [sources, setSources] = useState<Source[]>([]);
-  const [questionInput, setQuestionInput] = useState("");
-  const [answer, setAnswer] = useState("Waiting...");
-  const [isWaiting, setIsWaiting] = useState(true);
-
-  const addSource = async () => {
-    const url = urlInput.trim();
-
-    if (!url) return;
-
-    const response = await fetch("/api/process-url", {
-      method: "POST",
-
-      headers: {
-        "Content-Type": "application/json",
-      },
-
-      body: JSON.stringify({
-        url,
-      }),
-    });
-
-    const data = await response.json();
-
-    if (!data.success) {
-      alert("Unable to process website.");
-
-      return;
-    }
-
-    const newSource: Source = {
-      id: crypto.randomUUID(),
-
-      url,
-
-      title: data.title,
-
-      preview: data.preview,
-
-      text: data.text,
-    };
-
-    setSources((prev) => [...prev, newSource]);
-
-    setUrlInput("");
-  };
-
-  const removeSource = (index: number) => {
-    setSources((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  const askQuestion = () => {
-    const q = questionInput.trim();
-    if (!q) return;
-    setIsWaiting(true);
-    setAnswer("Waiting...");
-    setTimeout(() => {
-      setIsWaiting(false);
-      if (sources.length === 0) {
-        setAnswer(
-          "No sources added yet. Add a URL above so I have something to answer from.",
-        );
-      } else {
-        setAnswer(
-          `This is a placeholder answer for: "${q}" (based on ${sources.length} source${
-            sources.length > 1 ? "s" : ""
-          }).`,
-        );
-      }
-    }, 600);
-  };
+  const archive = useOharaArchive();
 
   return (
     <div
@@ -225,141 +58,23 @@ export default function OharaArchive() {
         </header>
 
         <Card>
-          <Label>Paste URL</Label>
-          <div style={{ display: "flex", gap: 10 }}>
-            <TextInput
-              value={urlInput}
-              onChange={setUrlInput}
-              placeholder="https://example.com/article"
-              onEnter={addSource}
-            />
-            <Button onClick={addSource}>Add</Button>
-          </div>
+          <UrlInput onSourceAdded={archive.handleSourceAdded} />
         </Card>
 
         <Card>
-          <Label>Uploaded Sources</Label>
-          {sources.length === 0 ? (
-            <div
-              style={{
-                textAlign: "center",
-                padding: "20px 0",
-                color: colors.muted,
-                fontSize: 13,
-              }}
-            >
-              <div
-                style={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: "50%",
-                  background: "#e3f3ea",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  margin: "0 auto 10px",
-                }}
-              >
-                <span
-                  style={{
-                    width: 8,
-                    height: 8,
-                    borderRadius: "50%",
-                    background: colors.teal,
-                    display: "block",
-                  }}
-                />
-              </div>
-              <div>No sources yet.</div>
-            </div>
-          ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              {sources.map((source, i) => (
-                <div
-                  key={source.id}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    padding: "10px 12px",
-                    background: colors.cream,
-                    border: `1px solid ${colors.border}`,
-                    borderRadius: 8,
-                  }}
-                >
-                  <div style={{ flex: 1 }}>
-                    <a
-                      href={source.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{
-                        color: colors.text,
-                        textDecoration: "none",
-                        fontWeight: 600,
-                      }}
-                    >
-                      {source.title || source.url}
-                    </a>
-
-                    <div
-                      style={{
-                        fontSize: 12,
-                        color: colors.muted,
-                        marginTop: 4,
-                      }}
-                    >
-                      {source.preview}
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={() => removeSource(i)}
-                    style={{
-                      background: "none",
-                      border: "none",
-                      color: colors.muted,
-                      fontSize: 16,
-                      cursor: "pointer",
-                    }}
-                  >
-                    &times;
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
+          <Label>Uploaded Source</Label>
+          <SourceList
+            sources={archive.sources}
+            onRemove={archive.removeSource}
+          />
         </Card>
 
         <Card>
-          <Label>Ask Question</Label>
-          <div style={{ display: "flex", gap: 10 }}>
-            <TextInput
-              value={questionInput}
-              onChange={setQuestionInput}
-              placeholder="What do you want to know?"
-              onEnter={askQuestion}
-            />
-            <Button onClick={askQuestion}>Ask</Button>
-          </div>
+          <QuestionInput onAsk={archive.askQuestion} />
         </Card>
 
         <Card>
-          <Label>Answer</Label>
-          <div
-            style={{
-              minHeight: 60,
-              padding: 14,
-              background: colors.cream,
-              border: `1px solid ${colors.border}`,
-              borderRadius: 8,
-              fontSize: 14,
-              color: isWaiting ? colors.muted : colors.text,
-              fontStyle: isWaiting ? "italic" : "normal",
-              lineHeight: 1.5,
-            }}
-          >
-            {answer}
-          </div>
+          <AnswerCard answer={archive.answer} isWaiting={archive.isWaiting} />
         </Card>
       </div>
     </div>
