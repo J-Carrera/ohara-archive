@@ -1,14 +1,11 @@
 "use client";
 
 import { useState } from "react";
-
 import type { Source } from "@/lib/types";
 
 export function useOharaArchive() {
   const [sources, setSources] = useState<Source[]>([]);
-
   const [answer, setAnswer] = useState("Waiting...");
-
   const [isWaiting, setIsWaiting] = useState(true);
 
   const handleSourceAdded = (source: Source) => {
@@ -19,26 +16,37 @@ export function useOharaArchive() {
     setSources((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const askQuestion = (question: string) => {
+  const askQuestion = async (question: string) => {
+    if (!question.trim()) return;
+
     setIsWaiting(true);
+    setAnswer("Thinking...");
 
-    setAnswer("Waiting...");
+    try {
+      const response = await fetch("/api/ask", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          question,
+        }),
+      });
 
-    setTimeout(() => {
-      setIsWaiting(false);
+      const data = await response.json();
 
-      if (sources.length === 0) {
-        setAnswer(
-          "No sources added yet. Add a URL above so I have something to answer from.",
-        );
-      } else {
-        setAnswer(
-          `This is a placeholder answer for: "${question}" (based on ${sources.length} source${
-            sources.length > 1 ? "s" : ""
-          }).`,
-        );
+      if (!response.ok || !data.success) {
+        setAnswer(data.error ?? "Unable to answer your question.");
+        return;
       }
-    }, 600);
+
+      setAnswer(data.answer);
+    } catch (error) {
+      console.error("ASK ERROR:", error);
+      setAnswer("Something went wrong while contacting the AI.");
+    } finally {
+      setIsWaiting(false);
+    }
   };
 
   return {
