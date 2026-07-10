@@ -4,6 +4,8 @@ import path from "path";
 export interface StoredChunk {
   id: string;
 
+  notebookId: string;
+
   sourceId: string;
 
   title: string;
@@ -16,7 +18,6 @@ export interface StoredChunk {
 
   embedding: number[];
 }
-
 const DATABASE_PATH = path.join(process.cwd(), "database", "knowledge.json");
 
 export async function getAllChunks(): Promise<StoredChunk[]> {

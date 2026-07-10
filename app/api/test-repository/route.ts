@@ -10,6 +10,8 @@ export async function GET() {
     {
       id: crypto.randomUUID(),
 
+      notebookId: "DEFAULT-notebook",
+
       sourceId: "demo",
 
       title: "Test",

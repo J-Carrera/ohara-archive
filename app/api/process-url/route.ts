@@ -3,11 +3,34 @@ import { processSource } from "@/lib/rag/pipeline";
 
 export async function POST(request: NextRequest) {
   try {
-    const { url } = await request.json();
+    const { url, notebookId } = await request.json();
 
-    const source = await processSource(url);
+    if (!url || typeof url !== "string") {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "A valid URL is required.",
+        },
+        { status: 400 },
+      );
+    }
 
-    return NextResponse.json(source);
+    if (!notebookId || typeof notebookId !== "string") {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "A notebook ID is required.",
+        },
+        { status: 400 },
+      );
+    }
+
+    const source = await processSource(notebookId, url);
+
+    return NextResponse.json({
+      success: true,
+      source,
+    });
   } catch (error) {
     console.error(error);
 

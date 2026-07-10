@@ -28,17 +28,18 @@ export default function UrlInput({ onSourceAdded }: UrlInputProps) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
+          notebookId: "default-notebook",
           url: trimmed,
         }),
       });
 
-      if (!response.ok) {
-        throw new Error("Unable to process article.");
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error ?? "Unable to process article.");
       }
 
-      const source: Source = await response.json();
-
-      onSourceAdded(source);
+      onSourceAdded(data.source);
 
       setUrl("");
     } catch (err) {

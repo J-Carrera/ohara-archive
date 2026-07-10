@@ -4,7 +4,10 @@ import { createEmbedding } from "./embeddings";
 import { Source } from "../types";
 import { saveChunks, StoredChunk } from "./repository/vectorRepository";
 
-export async function processSource(url: string): Promise<Source> {
+export async function processSource(
+  notebookId: string,
+  url: string,
+): Promise<Source> {
   const article = await extractArticle(url);
 
   if (!article.success) {
@@ -22,6 +25,8 @@ export async function processSource(url: string): Promise<Source> {
 
     storedChunks.push({
       id: crypto.randomUUID(),
+
+      notebookId,
 
       sourceId,
 
@@ -41,6 +46,8 @@ export async function processSource(url: string): Promise<Source> {
 
   return {
     id: sourceId,
+
+    notebookId,
 
     url,
 
