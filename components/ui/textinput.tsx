@@ -12,7 +12,9 @@ interface TextInputProps {
   value: string;
   onChange: (value: string) => void;
   placeholder: string;
-  onEnter: () => void;
+
+  // Optional callback when Enter is pressed
+  onEnter?: () => void;
 }
 
 export default function TextInput({
@@ -23,7 +25,7 @@ export default function TextInput({
 }: TextInputProps) {
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
-      onEnter();
+      onEnter?.();
     }
   };
 

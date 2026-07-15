@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import {
-  listNotebooks,
-  createNotebook,
-} from "../../../lib/rag/notebookManager";
+import { listNotebooks, createNotebook } from "@/lib/rag/notebookManager";
 
 export async function GET() {
   try {
@@ -21,30 +18,16 @@ export async function GET() {
         success: false,
         error: "Unable to load notebooks.",
       },
-      {
-        status: 500,
-      },
+      { status: 500 },
     );
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const { title, description } = await request.json();
+    const { title } = await request.json();
 
-    if (!title || typeof title !== "string") {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "Notebook title is required.",
-        },
-        {
-          status: 400,
-        },
-      );
-    }
-
-    const notebook = await createNotebook(title.trim(), description ?? "");
+    const notebook = await createNotebook(title);
 
     return NextResponse.json({
       success: true,
@@ -58,9 +41,7 @@ export async function POST(request: NextRequest) {
         success: false,
         error: "Unable to create notebook.",
       },
-      {
-        status: 500,
-      },
+      { status: 500 },
     );
   }
 }

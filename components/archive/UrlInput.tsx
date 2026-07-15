@@ -7,16 +7,20 @@ import Button from "../ui/button";
 import Label from "../ui/label";
 import TextInput from "../ui/textinput";
 
-import type { Source } from "@/lib/types";
+import type { Notebook } from "@/lib/types";
 
 interface UrlInputProps {
-  onSourceAdded: (source: Source) => void;
+  activeNotebook: Notebook;
+  onSourceAdded: () => Promise<void>;
 }
 
-export default function UrlInput({ onSourceAdded }: UrlInputProps) {
+export default function UrlInput({
+  activeNotebook,
+  onSourceAdded,
+}: UrlInputProps) {
   const [url, setUrl] = useState("");
 
-  const addSource = async () => {
+  async function addSource() {
     const trimmed = url.trim();
 
     if (!trimmed) return;
@@ -28,7 +32,7 @@ export default function UrlInput({ onSourceAdded }: UrlInputProps) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          notebookId: "default-notebook",
+          notebookId: activeNotebook.id,
           url: trimmed,
         }),
       });
@@ -39,14 +43,15 @@ export default function UrlInput({ onSourceAdded }: UrlInputProps) {
         throw new Error(data.error ?? "Unable to process article.");
       }
 
-      onSourceAdded(data.source);
+      await onSourceAdded();
 
       setUrl("");
-    } catch (err) {
-      console.error(err);
+    } catch (error) {
+      console.error(error);
+
       alert("Unable to process website.");
     }
-  };
+  }
 
   return (
     <Card>

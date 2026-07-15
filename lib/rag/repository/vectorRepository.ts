@@ -18,17 +18,30 @@ export interface StoredChunk {
 
   embedding: number[];
 }
+
 const DATABASE_PATH = path.join(process.cwd(), "database", "knowledge.json");
 
-export async function getAllChunks(): Promise<StoredChunk[]> {
+async function ensureDatabaseExists() {
   const exists = await fs.pathExists(DATABASE_PATH);
 
   if (!exists) {
     await fs.ensureFile(DATABASE_PATH);
     await fs.writeJson(DATABASE_PATH, []);
   }
+}
+
+export async function getAllChunks(): Promise<StoredChunk[]> {
+  await ensureDatabaseExists();
 
   return await fs.readJson(DATABASE_PATH);
+}
+
+export async function getChunksForNotebook(
+  notebookId: string,
+): Promise<StoredChunk[]> {
+  const chunks = await getAllChunks();
+
+  return chunks.filter((chunk) => chunk.notebookId === notebookId);
 }
 
 export async function saveChunks(chunks: StoredChunk[]): Promise<void> {
@@ -36,5 +49,7 @@ export async function saveChunks(chunks: StoredChunk[]): Promise<void> {
 
   existing.push(...chunks);
 
-  await fs.writeJson(DATABASE_PATH, existing, { spaces: 2 });
+  await fs.writeJson(DATABASE_PATH, existing, {
+    spaces: 2,
+  });
 }

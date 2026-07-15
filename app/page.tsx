@@ -1,16 +1,16 @@
 "use client";
 
-import { useState, KeyboardEvent } from "react";
 import SourceList from "../components/archive/sourceList";
 import UrlInput from "../components/archive/UrlInput";
 import QuestionInput from "../components/archive/questionInput";
 import AnswerCard from "../components/archive/answerCard";
-import { useOharaArchive } from "./hooks/useOharaArchive";
-import type { Source } from "../lib/types";
+import NotebookList from "../components/archive/notebookList";
+import NotebookCreator from "../components/archive/notebookCreator";
+
+import { useOhara } from "./hooks/useOhara";
+
 import Card from "../components/ui/card";
-import Button from "../components/ui/button";
 import Label from "../components/ui/label";
-import TextInput from "../components/ui/textinput";
 
 const colors = {
   sage: "#3f4d43",
@@ -19,64 +19,158 @@ const colors = {
   border: "#e3e0d9",
   text: "#2c2c2a",
   muted: "#8b8b85",
-  beigeBtn: "#d9cfbd",
-  beigeBtnHover: "#cdc0aa",
-  teal: "#7fc9a8",
 };
 
 export default function OharaArchive() {
-  const archive = useOharaArchive();
+  const {
+    notebooks,
+    activeNotebook,
+    setActiveNotebook,
+
+    createNotebook,
+
+    sources,
+
+    answer,
+    isWaiting,
+
+    handleSourceAdded,
+    removeSource,
+    askQuestion,
+  } = useOhara();
 
   return (
     <div
       style={{
-        background: colors.cream,
+        display: "flex",
         minHeight: "100vh",
+        background: colors.cream,
+        color: colors.text,
         fontFamily:
           "-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif",
-        color: colors.text,
       }}
     >
+      {/* =========================
+          Sidebar
+      ========================= */}
       <div
-        style={{ maxWidth: 720, margin: "0 auto", padding: "48px 24px 80px" }}
+        style={{
+          width: 320,
+          background: "#ffffff",
+          borderRight: "1px solid #e5e5e5",
+          display: "flex",
+          flexDirection: "column",
+        }}
       >
-        <header style={{ marginBottom: 28 }}>
-          <h1
+        <div
+          style={{
+            padding: 20,
+            borderBottom: "1px solid #ececec",
+          }}
+        >
+          <NotebookCreator onCreate={createNotebook} />
+        </div>
+
+        <div
+          style={{
+            flex: 1,
+            overflowY: "auto",
+          }}
+        >
+          <NotebookList
+            notebooks={notebooks}
+            activeNotebook={activeNotebook}
+            onSelect={setActiveNotebook}
+          />
+        </div>
+      </div>
+
+      {/* =========================
+          Main Content
+      ========================= */}
+      <main
+        style={{
+          flex: 1,
+          padding: "48px",
+        }}
+      >
+        <div
+          style={{
+            maxWidth: 850,
+            margin: "0 auto",
+          }}
+        >
+          <header
             style={{
-              fontSize: 28,
-              fontWeight: 700,
-              letterSpacing: 0.5,
-              margin: "0 0 4px",
-              color: colors.sage,
+              marginBottom: 32,
             }}
           >
-            OHARA ARCHIVE
-          </h1>
-          <p style={{ margin: 0, color: colors.muted, fontSize: 14 }}>
-            Monday, July 6
-          </p>
-        </header>
+            <h1
+              style={{
+                fontSize: 30,
+                fontWeight: 700,
+                color: colors.sage,
+                marginBottom: 8,
+              }}
+            >
+              OHARA ARCHIVE
+            </h1>
 
-        <Card>
-          <UrlInput onSourceAdded={archive.handleSourceAdded} />
-        </Card>
+            <p
+              style={{
+                color: colors.muted,
+                margin: 0,
+              }}
+            >
+              {activeNotebook
+                ? `Notebook: ${activeNotebook.title}`
+                : "Select or create a notebook to begin researching."}
+            </p>
+          </header>
 
-        <Card>
-          <Label>Uploaded Source</Label>
-          <SourceList
-            sources={archive.sources}
-            onRemove={archive.removeSource}
-          />
-        </Card>
+          {/* Upload URLs */}
+          {activeNotebook && (
+            <>
+              <Card>
+                <UrlInput
+                  activeNotebook={activeNotebook}
+                  onSourceAdded={handleSourceAdded}
+                />
+              </Card>
 
-        <Card>
-          <QuestionInput onAsk={archive.askQuestion} />
-        </Card>
+              <div style={{ height: 20 }} />
+            </>
+          )}
 
-        <Card>
-          <AnswerCard answer={archive.answer} isWaiting={archive.isWaiting} />
-        </Card>
-      </div>
+          {/* Uploaded Sources */}
+          {activeNotebook && (
+            <>
+              <Card>
+                <Label>Uploaded Sources</Label>
+
+                <SourceList sources={sources} onRemove={removeSource} />
+              </Card>
+
+              <div style={{ height: 20 }} />
+            </>
+          )}
+
+          {/* Ask Questions */}
+          {activeNotebook && (
+            <>
+              <Card>
+                <QuestionInput onAsk={askQuestion} />
+              </Card>
+
+              <div style={{ height: 20 }} />
+
+              <Card>
+                <AnswerCard answer={answer} isWaiting={isWaiting} />
+              </Card>
+            </>
+          )}
+        </div>
+      </main>
     </div>
   );
 }
