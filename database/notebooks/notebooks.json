@@ -1,18 +1,41 @@
 [
   {
-    "id": "2613d608-b61e-49f6-9b87-0040c796592f",
+    "id": "cb18c4c0-470f-4c08-a270-844619895eca",
     "title": "Animals",
     "description": "",
-    "summary": "",
-    "createdAt": "2026-07-15T17:26:49.811Z",
-    "updatedAt": "2026-07-15T17:26:49.811Z"
+    "summary": "The color of rhinos is not explicitly stated in the provided sources.",
+    "notes": [
+      "Rhino lifespan can vary depending on species and various factors",
+      "There is limited data available on the current population of rhinos worldwide.",
+      "Rhinos are typically gray or brown in color."
+    ],
+    "openQuestions": [
+      "How many rhinos are still living?"
+    ],
+    "researchTimeline": [
+      "Asked: \"What is a lion?\" (7/15/2026, 2:43:29 PM)",
+      "Asked: \"where do lion originate from?\" (7/15/2026, 2:44:12 PM)",
+      "Asked: \"Where do rhinos originate?\" (7/15/2026, 7:34:44 PM)",
+      "Asked: \"How heavy is a rhino\" (7/15/2026, 8:27:24 PM)",
+      "Asked: \"How long do rhinos live for?\" (7/15/2026, 8:30:24 PM)",
+      "Asked: \"How many rhinos are still living?\" (7/15/2026, 8:30:52 PM)",
+      "Asked: \"What color are rhinos?\" (7/15/2026, 8:31:22 PM)"
+    ],
+    "createdAt": "2026-07-15T17:41:41.668Z",
+    "updatedAt": "2026-07-16T00:31:23.160Z"
   },
   {
-    "id": "cff2f1be-2e3b-4f80-975a-3809cf497464",
+    "id": "8d957532-babf-4474-90db-7ad969568d84",
     "title": "Astronomy",
     "description": "",
     "summary": "",
-    "createdAt": "2026-07-15T17:27:50.845Z",
-    "updatedAt": "2026-07-15T17:27:50.845Z"
+    "notes": [],
+    "openQuestions": [],
+    "researchTimeline": [
+      "Asked: \"What is the milky way?\" (7/15/2026, 6:03:16 PM)",
+      "Asked: \"How many times have we travelled to the moon?\" (7/15/2026, 6:10:15 PM)"
+    ],
+    "createdAt": "2026-07-15T22:02:44.790Z",
+    "updatedAt": "2026-07-15T22:10:15.572Z"
   }
 ]

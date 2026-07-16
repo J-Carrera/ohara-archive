@@ -60,6 +60,12 @@ export interface Notebook {
 
   summary: string;
 
+  notes: string[];
+
+  openQuestions: string[];
+
+  researchTimeline: string[];
+
   createdAt: string;
 
   updatedAt: string;

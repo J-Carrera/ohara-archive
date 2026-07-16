@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { retrieveRelevantChunks } from "@/lib/rag/retriever";
 import { generateAnswer } from "@/lib/rag/ollama";
+import { recordQuestion } from "../../../lib/rag/notebookMemory";
+import { reflectOnResearch } from "@/lib/rag/notebookReflection";
+import {
+  addResearchNote,
+  addOpenQuestion,
+  updateSummary,
+} from "@/lib/rag/notebookMemory";
 
 export async function POST(request: NextRequest) {
   try {
@@ -70,7 +77,31 @@ ANSWER
 `;
 
     // Generate answer
+    // Generate the answer
     const answer = await generateAnswer(prompt);
+
+    // Record the user's research activity
+    await recordQuestion(notebookId, question);
+
+    // Ask a second AI to reflect on what was learned
+    const reflection = await reflectOnResearch(question, answer);
+    console.log("========== REFLECTION ==========");
+    console.log(reflection);
+
+    // Save research notes
+    for (const note of reflection.notes) {
+      await addResearchNote(notebookId, note);
+    }
+
+    // Save unanswered questions
+    for (const openQuestion of reflection.openQuestions) {
+      await addOpenQuestion(notebookId, openQuestion);
+    }
+
+    // Update notebook summary
+    if (reflection.summary) {
+      await updateSummary(notebookId, reflection.summary);
+    }
 
     return NextResponse.json({
       success: true,

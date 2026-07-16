@@ -8,7 +8,10 @@ export async function listNotebooks(): Promise<Notebook[]> {
   return await getAllNotebooks();
 }
 
-export async function createNotebook(title: string): Promise<Notebook> {
+export async function createNotebook(
+  title: string,
+  description: string = "",
+): Promise<Notebook> {
   const now = new Date().toISOString();
 
   const notebook: Notebook = {
@@ -16,9 +19,21 @@ export async function createNotebook(title: string): Promise<Notebook> {
 
     title,
 
-    description: "",
+    description,
 
     summary: "",
+
+    // ==========================
+    // AI Research Memory
+    // ==========================
+
+    notes: [],
+
+    openQuestions: [],
+
+    researchTimeline: [],
+
+    // ==========================
 
     createdAt: now,
 
